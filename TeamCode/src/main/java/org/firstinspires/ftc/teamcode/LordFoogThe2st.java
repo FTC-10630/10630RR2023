@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -8,6 +9,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.MotorControlAlgorithm;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -44,8 +47,8 @@ public class LordFoogThe2st extends LinearOpMode {
     private DcMotor frontLeft;
     private DcMotor backRight;
     private DcMotor backLeft;
-    private DcMotor spoolRight;
-    private DcMotor spoolLeft;
+    private DcMotorEx spoolRight;
+    private DcMotorEx spoolLeft;
     private Servo axel;
     private Servo wrist;
     private Servo claw;
@@ -54,6 +57,8 @@ public class LordFoogThe2st extends LinearOpMode {
     private double speed;
     private double[] oldV; // old velocities
     private double liftLevel;
+    private double strafeAdjustment;
+    private double forwardAdjustment;
 
     // States
     private boolean isGrabbing;
@@ -71,9 +76,10 @@ public class LordFoogThe2st extends LinearOpMode {
     final double TURN_SPEED = 1.0;
     final double A_LIMIT = 0.05; // acceleration per tick limit
     final double PRECISE_SPEED = 0.2;
+
     
-    final double LIFT_POWER = 1.0; // TODO: try changing it somehow or adding acceleration limit to make lifting smoother
-    final double LIFT_SPEED = 1.5;
+    final double LIFT_POWER = 0.9; //
+    final double LIFT_SPEED = 5.0; //TODO: try to turn up the speed until its good or the PID can't keep up.
     final int MAX_LIFT_LEVEL = 2735; // MAX value is ~38.5 in. * ~77 = ~2926 // every 1500 ticks is ~2.5 in ~77 tpi.
     final int MIN_LIFT_LEVEL = 4;
     final int START_LIFT_LEVEL = 0;
@@ -96,16 +102,18 @@ public class LordFoogThe2st extends LinearOpMode {
 
         // main loop
         while (opModeIsActive()) {
-            // TODO: make it work without this if-else
-            if (gamepad2.dpad_up || gamepad2.dpad_down || gamepad2.dpad_left || gamepad2.dpad_right) { 
-                preciseset();
-            }
-            else {
-                driveset();
-            }
+
+            driveset();
+
 
             liftset();
-            telemetry.addData("Lift Level", (int) (liftLevel * 10) / 10.0);
+            telemetry.addData("Lift Target", (int) (liftLevel * 10) / 10.0);
+            telemetry.addData("Lift Level",(int) ((spoolRight.getCurrentPosition()+spoolLeft.getCurrentPosition()) *10)/20);
+            telemetry.addData("Diff", ((int)liftLevel-(spoolRight.getCurrentPosition()+spoolLeft.getCurrentPosition())/2)%1000);
+            telemetry.addData("rightPID",spoolRight.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER));
+            telemetry.addData("rightP",spoolRight.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION));
+            telemetry.addData("leftPID",spoolLeft.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER));
+            telemetry.addData("leftP",spoolLeft.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION));
 
             handset();
 
@@ -123,11 +131,28 @@ public class LordFoogThe2st extends LinearOpMode {
         if (gamepad2.left_bumper) {
             speed = LOW_SPEED;
         }
-        
+        if (gamepad2.dpad_up) { // move forward
+            forwardAdjustment = PRECISE_SPEED;
+        }
+        else if (gamepad2.dpad_down) { // move backward
+            forwardAdjustment=-PRECISE_SPEED;
+        }
+        else {
+            forwardAdjustment=0;
+        }
+        if (gamepad2.dpad_left) { // strafe left
+            strafeAdjustment=PRECISE_SPEED;
+        }
+        else if (gamepad2.dpad_right) { // strafe right
+            strafeAdjustment=-PRECISE_SPEED;
+        }
+        else {
+            strafeAdjustment=0;
+        }
         double ls_y = -gamepad2.left_stick_y, ls_x = -gamepad2.left_stick_x; // -1 - 1
         double rs_x = -gamepad2.right_stick_x; // -1 - 1
 
-        //                   move  strafe    turn
+        //                   move  strafe    turn             precise move      precise strafe
         double frontLeftV  = ls_x - ls_y + TURN_SPEED*rs_x;
         double frontRightV = ls_x + ls_y + TURN_SPEED*rs_x;
         double backLeftV   = ls_x + ls_y - TURN_SPEED*rs_x;
@@ -139,6 +164,11 @@ public class LordFoogThe2st extends LinearOpMode {
         frontRightV = frontRightV / ((2 + TURN_SPEED) * MAX_STICK_COORD) * speed;
         backLeftV   = backLeftV   / ((2 + TURN_SPEED) * MAX_STICK_COORD) * speed;
         backRightV  = backRightV  / ((2 + TURN_SPEED) * MAX_STICK_COORD) * speed;
+
+        frontLeftV  = frontLeftV  -forwardAdjustment +strafeAdjustment;
+        frontRightV = frontRightV +forwardAdjustment +strafeAdjustment;
+        backLeftV   = backLeftV   +forwardAdjustment +strafeAdjustment;
+        backRightV  = backRightV  -forwardAdjustment +strafeAdjustment;
 
         double[] accelerationV = new double[4]; // acceleration of each motor
         accelerationV[0] = frontLeftV - oldV[0];
@@ -169,6 +199,7 @@ public class LordFoogThe2st extends LinearOpMode {
 
     // Move with super low speed to precise the robot's position
     // (use dpad)
+    /*
     private void preciseset() {
         // set speed
         if (gamepad2.dpad_up) { // move forward
@@ -196,26 +227,27 @@ public class LordFoogThe2st extends LinearOpMode {
             backRight.setPower(-PRECISE_SPEED);
         }
     }
+     */
 
 
     // Code that controlls the spools
     // (use gamepad1 dpad)
     private void liftset() {
-        /* 
+
         // old lift code (moves slower, but less smoothly)
         if (gamepad1.dpad_up && liftLevel < MAX_LIFT_LEVEL) {
             liftLevel += 3.0 * LIFT_SPEED;
         }
         if (gamepad1.dpad_down) {
-            liftLevel =  Math.max(liftLevel - 2.0 * LIFT_SPEED, MIN_LIFT_LEVEL);
+            liftLevel =  Math.max(liftLevel - 3.0 * LIFT_SPEED, MIN_LIFT_LEVEL);
         }
-        */
+
         
         // current spools position
-        double currentAvg = (spoolLeft.getCurrentPosition() + spoolRight.getCurrentPosition()) / 2.0;
+        //double currentAvg = (spoolLeft.getCurrentPosition() + spoolRight.getCurrentPosition()) / 2.0;
         //       if   button pressed  then    move    else   stay
-        liftLevel = gamepad1.dpad_up   ? MAX_LIFT_LEVEL : currentAvg;
-        liftLevel = gamepad1.dpad_down ? MIN_LIFT_LEVEL : liftLevel;
+        //liftLevel = gamepad1.dpad_up   ? MAX_LIFT_LEVEL : currentAvg;
+        //liftLevel = gamepad1.dpad_down ? MIN_LIFT_LEVEL : liftLevel;
         
         //telemetry.addLine("level" + liftLevel);
 
@@ -285,8 +317,10 @@ public class LordFoogThe2st extends LinearOpMode {
         frontLeft = hardwareMap.get(DcMotor.class, "fl");
         backRight = hardwareMap.get(DcMotor.class, "br");
         backLeft = hardwareMap.get(DcMotor.class, "bl");
-        spoolRight = hardwareMap.get(DcMotor.class, "spoolr");
-        spoolLeft = hardwareMap.get(DcMotor.class, "spooll");
+        spoolRight = hardwareMap.get(DcMotorEx.class, "spoolr");
+        spoolLeft = hardwareMap.get(DcMotorEx.class, "spooll");
+        spoolRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(10,1,2,0));
+        spoolLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(10,1,2,0));
 
         frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -301,14 +335,14 @@ public class LordFoogThe2st extends LinearOpMode {
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         spoolLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-        spoolLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        spoolLeft.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         spoolLeft.setTargetPosition(START_LIFT_LEVEL);
-        spoolLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        spoolLeft.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         spoolLeft.setPower(LIFT_POWER);
         //spoolRight.setDirection(DcMotorSimple.Direction.REVERSE);
-        spoolRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        spoolRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         spoolRight.setTargetPosition(START_LIFT_LEVEL);
-        spoolRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        spoolRight.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         spoolRight.setPower(LIFT_POWER);
 
         frontRight.setPower(0);
