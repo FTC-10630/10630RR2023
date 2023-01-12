@@ -74,12 +74,12 @@ public class LordFoogThe2st extends LinearOpMode {
     final double HIGH_SPEED = 2.0;
     final double LOW_SPEED = 0.7;
     final double TURN_SPEED = 1.0;
-    final double A_LIMIT = 0.05; // acceleration per tick limit
+    final double A_LIMIT = 0.15; // acceleration per tick limit
     final double PRECISE_SPEED = 0.2;
 
     
     final double LIFT_POWER = 0.9; //
-    final double LIFT_SPEED = 5.0; //TODO: try to turn up the speed until its good or the PID can't keep up.
+    final double LIFT_SPEED = 12.0; //TODO: try to turn up the speed until its good or the PID can't keep up.
     final int MAX_LIFT_LEVEL = 2735; // MAX value is ~38.5 in. * ~77 = ~2926 // every 1500 ticks is ~2.5 in ~77 tpi.
     final int MIN_LIFT_LEVEL = 4;
     final int START_LIFT_LEVEL = 0;
@@ -320,7 +320,9 @@ public class LordFoogThe2st extends LinearOpMode {
         spoolRight = hardwareMap.get(DcMotorEx.class, "spoolr");
         spoolLeft = hardwareMap.get(DcMotorEx.class, "spooll");
         spoolRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(10,1,2,0));
+        spoolRight.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION,new PIDFCoefficients(15,0,0,0));
         spoolLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(10,1,2,0));
+        spoolLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION,new PIDFCoefficients(15,0,0,0));
 
         frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
