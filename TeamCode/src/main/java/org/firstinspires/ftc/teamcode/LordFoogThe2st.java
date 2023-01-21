@@ -126,6 +126,7 @@ public class LordFoogThe2st extends LinearOpMode {
     // Robot can go in all four directions with the left stick and turn with the right stick
     private void driveset() {
         if (gamepad2.right_bumper) {
+            gamepad2.rumble(0.25,0.25,50);
             speed = HIGH_SPEED;
         }
         if (gamepad2.left_bumper) {
@@ -324,11 +325,11 @@ public class LordFoogThe2st extends LinearOpMode {
         spoolLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(10,1,2,0));
         spoolLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION,new PIDFCoefficients(15,0,0,0));
 
-        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-        backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);

@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -24,7 +25,7 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 @Autonomous
-public class AutoBa extends LinearOpMode {
+public class AutoSpline extends LinearOpMode {
     private SampleMecanumDrive drive;
 
 
@@ -141,50 +142,47 @@ public class AutoBa extends LinearOpMode {
 
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         // Example: moveSomewhere(double speed, double inches);
-        Pose2d startPose = new Pose2d(38, -60, Math.toRadians(90));
+        Pose2d startPose =new Pose2d(-35.50, -60.20, Math.toRadians(90.00)); //this rotation might be off
+        //-31 inches
         drive.setPoseEstimate(startPose);
         TrajectorySequence untitled0 = drive.trajectorySequenceBuilder(new Pose2d(-35.50, -60.20, Math.toRadians(90.00)))
-                .splineTo(new Vector2d(-32.83, -44.85), Math.toRadians(86.46))
-                .splineTo(new Vector2d(-35.28, -13.91), Math.toRadians(77.46))
-                .splineTo(new Vector2d(-29.04, -9.01), Math.toRadians(87.62))
+                .splineTo(new Vector2d(-36, -19.03), Math.toRadians(87.56))
+//                .splineTo(new Vector2d(-24.37, -4.34), Math.toRadians(90))
+//                .build();
+                .splineTo(new Vector2d(-29.6, -0.5), Math.toRadians(45))
+                .build();
+        TrajectorySequence reverse = drive.trajectorySequenceBuilder(untitled0.end())
+                .splineToConstantHeading(new Vector2d(-32.37, -12), Math.toRadians(45))
+                //.splineTo(new Vector2d(-24.37, -19.03), Math.toRadians(87.0))
+                .turn(Math.toRadians(-45))
+                .splineToConstantHeading(new Vector2d(-63, -9.7), Math.toRadians(0))
                 .build();
         TrajectorySequence untitled1 = (drive.trajectorySequenceBuilder(new Pose2d(-35.06, -65, Math.toRadians(90)))
-                        .splineTo(new Vector2d(-33, -15.13), Math.toRadians(75.87))
-                        .splineTo(new Vector2d(-23.93, -3.23), Math.toRadians(79.12))
-                        .build());
+                .splineTo(new Vector2d(-33, -15.), Math.toRadians(75.87))
+                .splineTo(new Vector2d(-15.93, -3.23), Math.toRadians(79.12))
+                .build());
 
-
-        TrajectorySequence toPole = drive.trajectorySequenceBuilder(startPose)
-                //
-                .forward(50)
-                .strafeRight(11)
-                .forward(5)
-                .build();
-
-        TrajectorySequence parkLeft = drive.trajectorySequenceBuilder(toPole.end())
+        TrajectorySequence parkLeft = drive.trajectorySequenceBuilder(reverse.end())
                 //TODO: CREATE LEFT PARKING TRAJECTORY
-                .back(7)
-                .strafeLeft(22.5)
+                .splineTo(new Vector2d(-61,-12),Math.toRadians(0))
                 .build();
 
-        TrajectorySequence parkMiddle = drive.trajectorySequenceBuilder(toPole.end())
+        TrajectorySequence parkMiddle = drive.trajectorySequenceBuilder(reverse.end())
                 //TODO: CREATE MIDDLE PARKING TRAJECTORY
-                .back(7)
-                .strafeLeft(11.5)
-                .build();
+                .splineTo(new Vector2d(-32.37, -12),Math.toRadians(0)).build();
 
 
-        TrajectorySequence parkRight = drive.trajectorySequenceBuilder(toPole.end())
+        TrajectorySequence parkRight = drive.trajectorySequenceBuilder(reverse.end())
                 //TODO: CREATE RIGHT PARKING TRAJECTORY
-                .back(7)
-                .strafeRight(11.5)
-                .build();
+                .splineTo(new Vector2d(-14, -12),Math.toRadians(0)).build();
+
+        ;
 
 
 
         /*=-- MOVE CODE SEGMENT START --=*/
         axelFlip();
-        drive.followTrajectorySequence(toPole);
+        drive.followTrajectorySequence(untitled0);
         sleep(1000);
         /*
         moveForward(LOW_SPEED, TILE * 2 + 1);
@@ -204,7 +202,13 @@ public class AutoBa extends LinearOpMode {
         sleep(1500);
         ungrab();
         sleep(1000);
-
+        axelFlip();
+        drive.followTrajectorySequence(reverse);
+        lift(538);
+        sleep(1500);
+        grab();
+        sleep(1000);
+        lift(900);
         // RED -- RIGHT ZONE
         if (webcamResponce == 0) {
             drive.followTrajectorySequence(parkRight);
@@ -224,7 +228,7 @@ public class AutoBa extends LinearOpMode {
         }
 
         lift(0);
-        sleep(1500);
+        sleep(5000);
         /*=-- MOVE CODE SEGMENT END --=*/
 
 
