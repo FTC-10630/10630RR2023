@@ -176,14 +176,13 @@ public class AutoSpline extends LinearOpMode {
                 //TODO: CREATE RIGHT PARKING TRAJECTORY
                 .splineTo(new Vector2d(-14, -12),Math.toRadians(0)).build();
 
-        ;
 
 
 
         /*=-- MOVE CODE SEGMENT START --=*/
         axelFlip();
         drive.followTrajectorySequence(untitled0);
-        sleep(1000);
+        //sleep(1000);
         /*
         moveForward(LOW_SPEED, TILE * 2 + 1);
         strafeRight(LOW_SPEED, 11.7);
@@ -199,16 +198,18 @@ public class AutoSpline extends LinearOpMode {
         lift(MAX_LIFT_LEVEL);
         sleep(1500);
         axelFlip();
-        sleep(1500);
+        sleep(2000);
         ungrab();
-        sleep(1000);
+        sleep(500);
         axelFlip();
+
         drive.followTrajectorySequence(reverse);
-        lift(538);
+        lift(500); // was 538
         sleep(1500);
         grab();
-        sleep(1000);
-        lift(900);
+        sleep(500);
+        lift(550);
+        //lift(900);
         // RED -- RIGHT ZONE
         if (webcamResponce == 0) {
             drive.followTrajectorySequence(parkRight);
@@ -228,7 +229,7 @@ public class AutoSpline extends LinearOpMode {
         }
 
         lift(0);
-        sleep(5000);
+        sleep(15000);
         /*=-- MOVE CODE SEGMENT END --=*/
 
 
