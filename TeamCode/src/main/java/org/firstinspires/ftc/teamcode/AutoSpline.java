@@ -149,13 +149,13 @@ public class AutoSpline extends LinearOpMode {
                 .splineTo(new Vector2d(-36, -19.03), Math.toRadians(87.56))
 //                .splineTo(new Vector2d(-24.37, -4.34), Math.toRadians(90))
 //                .build();
-                .splineTo(new Vector2d(-29.6, -0.5), Math.toRadians(45))
+                .splineTo(new Vector2d(-30, -1), Math.toRadians(45))
                 .build();
         TrajectorySequence reverse = drive.trajectorySequenceBuilder(untitled0.end())
                 .splineToConstantHeading(new Vector2d(-32.37, -12), Math.toRadians(45))
                 //.splineTo(new Vector2d(-24.37, -19.03), Math.toRadians(87.0))
                 .turn(Math.toRadians(-45))
-                .splineToConstantHeading(new Vector2d(-63, -9.7), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(-63.5, -9.7), Math.toRadians(0))
                 .build();
         TrajectorySequence untitled1 = (drive.trajectorySequenceBuilder(new Pose2d(-35.06, -65, Math.toRadians(90)))
                 .splineTo(new Vector2d(-33, -15.), Math.toRadians(75.87))
@@ -220,12 +220,12 @@ public class AutoSpline extends LinearOpMode {
         }
         // BLUE -- LEFT ZONE
         else if (webcamResponce == 2) {
-            drive.followTrajectorySequence(parkLeft);
+            //drive.followTrajectorySequence(parkLeft);
         }
         // ERROR
         else if (webcamResponce == 3) {
             telemetry.addData("COLOR", "ERROR");
-            drive.followTrajectorySequence(parkLeft);
+            drive.followTrajectorySequence(parkRight);
         }
 
         lift(0);

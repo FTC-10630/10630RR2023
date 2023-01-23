@@ -79,9 +79,10 @@ public class LordFoogThe2st extends LinearOpMode {
 
     
     final double LIFT_POWER = 0.9; //
-    final double LIFT_SPEED = 12.0; //TODO: try to turn up the speed until its good or the PID can't keep up.
-    final int MAX_LIFT_LEVEL = 2735; // MAX value is ~38.5 in. * ~77 = ~2926 // every 1500 ticks is ~2.5 in ~77 tpi.
-    final int MIN_LIFT_LEVEL = 4;
+    final double LIFT_SPEED = 12.0;
+    final double PRECISE_LIFT_SPEED = 5.0; //TODO: try to turn up the speed until its good or the PID can't keep up.
+    int MAX_LIFT_LEVEL = 2735; // MAX value is ~38.5 in. * ~77 = ~2926 // every 1500 ticks is ~2.5 in ~77 tpi.
+    int MIN_LIFT_LEVEL = 4;
     final int START_LIFT_LEVEL = 0;
 
     final double FRONT_AXEL_POSITION = 0.83;
@@ -109,6 +110,9 @@ public class LordFoogThe2st extends LinearOpMode {
 
             liftset();
             if (liftLevel>=MAX_LIFT_LEVEL-5){
+                gamepad1.rumble(0.25,0.25,50);
+            }
+            if (liftLevel<=MIN_LIFT_LEVEL+5){
                 gamepad1.rumble(0.25,0.25,50);
             }
             telemetry.addData("Lift Target", (int) (liftLevel * 10) / 10.0);
@@ -239,14 +243,28 @@ public class LordFoogThe2st extends LinearOpMode {
     private void liftset() {
 
         // old lift code (moves slower, but less smoothly)
-        if (gamepad1.dpad_up && liftLevel < MAX_LIFT_LEVEL) {
-            liftLevel += 3.0 * LIFT_SPEED;
-        }
-        if (gamepad1.dpad_down) {
-            liftLevel =  Math.max(liftLevel - 3.0 * LIFT_SPEED, MIN_LIFT_LEVEL);
+
+        if (!gamepad1.x) {
+            if (gamepad1.dpad_up && liftLevel < MAX_LIFT_LEVEL) {
+                liftLevel = Math.min(liftLevel + 3.0 * LIFT_SPEED, MAX_LIFT_LEVEL);
+            }
+            if (gamepad1.dpad_down) {
+                liftLevel = Math.max(liftLevel - 3.0 * LIFT_SPEED, MIN_LIFT_LEVEL);
+            }
+        } else {
+            if (gamepad1.dpad_up) {
+                liftLevel = liftLevel + 3.0 * PRECISE_LIFT_SPEED;
+            }
+            if (gamepad1.dpad_down) {
+                liftLevel =  liftLevel - 3.0 * PRECISE_LIFT_SPEED;
+            }
         }
 
-        
+        if (gamepad1.start) {
+            MIN_LIFT_LEVEL = (int) (liftLevel);
+            MAX_LIFT_LEVEL = MIN_LIFT_LEVEL + 2731;
+        }
+
         // current spools position
         //double currentAvg = (spoolLeft.getCurrentPosition() + spoolRight.getCurrentPosition()) / 2.0;
         //       if   button pressed  then    move    else   stay

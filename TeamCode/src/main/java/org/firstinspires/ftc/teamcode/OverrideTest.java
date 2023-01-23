@@ -255,7 +255,7 @@ public class OverrideTest extends LinearOpMode {
         }
 
         if (gamepad1.start) {
-            MIN_LIFT_LEVEL = liftLevel;
+            MIN_LIFT_LEVEL = (int)liftLevel;
             MAX_LIFT_LEVEL = MIN_LIFT_LEVEL + 2731;
         }
         
