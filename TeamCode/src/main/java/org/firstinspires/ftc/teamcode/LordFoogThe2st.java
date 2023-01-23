@@ -27,7 +27,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Y - grab / ungrab with claw
  * B - flip axel
  * A - flip wrist
- * *removed* X - wrist vertical position (to grab fallen cones)
+ * X - override limits
+ * Options - set current position as lowest
  *
  * Gamepad 2:
  * left stick - ride + strafe
@@ -39,10 +40,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * *test* Right Trigger - slightly moves axel in
  */
 
-// Remember to comment everything
-
-@TeleOp(name="LordFoogThe2st", group = "TeleOp")
-public class LordFoogThe2st extends LinearOpMode {
+@TeleOp(name="OverrideTest", group = "TeleOp")
+public class OverrideTest extends LinearOpMode {
     private DcMotor frontRight;
     private DcMotor frontLeft;
     private DcMotor backRight;
@@ -107,14 +106,7 @@ public class LordFoogThe2st extends LinearOpMode {
             driveset();
 
 
-
             liftset();
-            if (liftLevel>=MAX_LIFT_LEVEL-5){
-                gamepad1.rumble(0.25,0.25,50);
-            }
-            if (liftLevel<=MIN_LIFT_LEVEL+5){
-                gamepad1.rumble(0.25,0.25,50);
-            }
             telemetry.addData("Lift Target", (int) (liftLevel * 10) / 10.0);
             telemetry.addData("Lift Level",(int) ((spoolRight.getCurrentPosition()+spoolLeft.getCurrentPosition()) *10)/20);
             telemetry.addData("Diff", ((int)liftLevel-(spoolRight.getCurrentPosition()+spoolLeft.getCurrentPosition())/2)%1000);
@@ -134,6 +126,7 @@ public class LordFoogThe2st extends LinearOpMode {
     // Robot can go in all four directions with the left stick and turn with the right stick
     private void driveset() {
         if (gamepad2.right_bumper) {
+            gamepad2.rumble(0.25,0.25,50);
             speed = HIGH_SPEED;
         }
         if (gamepad2.left_bumper) {
@@ -243,7 +236,7 @@ public class LordFoogThe2st extends LinearOpMode {
     private void liftset() {
 
         // old lift code (moves slower, but less smoothly)
-
+        
         if (!gamepad1.x) {
             if (gamepad1.dpad_up && liftLevel < MAX_LIFT_LEVEL) {
                 liftLevel = Math.min(liftLevel + 3.0 * LIFT_SPEED, MAX_LIFT_LEVEL);
@@ -261,10 +254,10 @@ public class LordFoogThe2st extends LinearOpMode {
         }
 
         if (gamepad1.start) {
-            MIN_LIFT_LEVEL = (int) (liftLevel);
+            MIN_LIFT_LEVEL = (int)liftLevel;
             MAX_LIFT_LEVEL = MIN_LIFT_LEVEL + 2731;
         }
-
+        
         // current spools position
         //double currentAvg = (spoolLeft.getCurrentPosition() + spoolRight.getCurrentPosition()) / 2.0;
         //       if   button pressed  then    move    else   stay
@@ -341,10 +334,10 @@ public class LordFoogThe2st extends LinearOpMode {
         backLeft = hardwareMap.get(DcMotor.class, "bl");
         spoolRight = hardwareMap.get(DcMotorEx.class, "spoolr");
         spoolLeft = hardwareMap.get(DcMotorEx.class, "spooll");
-        spoolRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(15,1,2,0));
-        spoolRight.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION,new PIDFCoefficients(18,0,0,0));
-        spoolLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(15,1,2,0));
-        spoolLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION,new PIDFCoefficients(18,0,0,0));
+        spoolRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(10,1,2,0));
+        spoolRight.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION,new PIDFCoefficients(15,0,0,0));
+        spoolLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(10,1,2,0));
+        spoolLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION,new PIDFCoefficients(15,0,0,0));
 
         frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
