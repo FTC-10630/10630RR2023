@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 
 // ALWAYS START TeleOp WITH SPOOLS AT THE LOWEST POSITION
@@ -40,8 +41,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * *test* Right Trigger - slightly moves axel in
  */
 
-@TeleOp(name="OverrideTest", group = "TeleOp")
-public class OverrideTest extends LinearOpMode {
+@TeleOp(name="LordFoogThe2st", group = "TeleOp")
+public class LordFoogThe2st extends LinearOpMode {
     private DcMotor frontRight;
     private DcMotor frontLeft;
     private DcMotor backRight;
@@ -51,7 +52,10 @@ public class OverrideTest extends LinearOpMode {
     private Servo axel;
     private Servo wrist;
     private Servo claw;
-
+    private DistanceSensor distanceBack;
+    private DistanceSensor distanceFront;
+    
+    
     // Mutable variables
     private double speed;
     private double[] oldV; // old velocities
@@ -334,6 +338,8 @@ public class OverrideTest extends LinearOpMode {
         backLeft = hardwareMap.get(DcMotor.class, "bl");
         spoolRight = hardwareMap.get(DcMotorEx.class, "spoolr");
         spoolLeft = hardwareMap.get(DcMotorEx.class, "spooll");
+       
+        
         spoolRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(10,1,2,0));
         spoolRight.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION,new PIDFCoefficients(15,0,0,0));
         spoolLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(10,1,2,0));
@@ -375,5 +381,9 @@ public class OverrideTest extends LinearOpMode {
         claw.setPosition(GRAB_CLAW_POSITION);
         axel.setPosition(FRONT_AXEL_POSITION);
         wrist.setPosition(BACK_WRIST_POSITION);
+        
+        // initialize sensors
+        distanceFront = hardwareMap.get(DistanceSensor.class, "df");
+        distanceBack = hardwareMap.get(DistanceSensor.class, "db");
     }
 }
