@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -25,7 +24,7 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 @Autonomous
-public class AutoSpline extends LinearOpMode {
+public class Dunkaccino extends LinearOpMode {
     private SampleMecanumDrive drive;
 
 
@@ -147,34 +146,41 @@ public class AutoSpline extends LinearOpMode {
         drive.setPoseEstimate(startPose);
         TrajectorySequence untitled0 = drive.trajectorySequenceBuilder(new Pose2d(-35.50, -60.20, Math.toRadians(90.00)))
                 .splineTo(new Vector2d(-36, -19.03), Math.toRadians(87.56))
-//                .splineTo(new Vector2d(-24.37, -4.34), Math.toRadians(90))
-//                .build();
+                //.splineTo(new Vector2d(-24.37, -4.34), Math.toRadians(90))
+                //.build();
                 .splineTo(new Vector2d(-30, -1), Math.toRadians(45))
                 .build();
         TrajectorySequence reverse = drive.trajectorySequenceBuilder(untitled0.end())
                 .splineToConstantHeading(new Vector2d(-32.37, -12), Math.toRadians(45))
                 //.splineTo(new Vector2d(-24.37, -19.03), Math.toRadians(87.0))
                 .turn(Math.toRadians(-45))
-                .splineToConstantHeading(new Vector2d(-63.5, -9.7), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(-64.7, -8.3), Math.toRadians(0))
+                .build();
+        TrajectorySequence back = drive.trajectorySequenceBuilder(reverse.end())
+                .splineToConstantHeading(new Vector2d(-32.37, -12), Math.toRadians(0))
+                .turn(Math.toRadians(45))
+                .splineToConstantHeading(new Vector2d(-30, -1), Math.toRadians(0))
                 .build();
         TrajectorySequence untitled1 = (drive.trajectorySequenceBuilder(new Pose2d(-35.06, -65, Math.toRadians(90)))
-                .splineTo(new Vector2d(-33, -15.), Math.toRadians(75.87))
+                .splineTo(new Vector2d(-33, -15), Math.toRadians(75.87))
                 .splineTo(new Vector2d(-15.93, -3.23), Math.toRadians(79.12))
                 .build());
 
-        TrajectorySequence parkLeft = drive.trajectorySequenceBuilder(reverse.end())
+        TrajectorySequence parkLeft = drive.trajectorySequenceBuilder(back.end())
                 //TODO: CREATE LEFT PARKING TRAJECTORY
-                .splineTo(new Vector2d(-61,-12),Math.toRadians(0))
+                .splineTo(new Vector2d(-59.5,-8.3),Math.toRadians(0))
                 .build();
 
-        TrajectorySequence parkMiddle = drive.trajectorySequenceBuilder(reverse.end())
+        TrajectorySequence parkMiddle = drive.trajectorySequenceBuilder(back.end())
                 //TODO: CREATE MIDDLE PARKING TRAJECTORY
-                .splineTo(new Vector2d(-32.37, -12),Math.toRadians(0)).build();
+                .splineTo(new Vector2d(-35.37, -12),Math.toRadians(0))
+                .build();
 
 
-        TrajectorySequence parkRight = drive.trajectorySequenceBuilder(reverse.end())
+        TrajectorySequence parkRight = drive.trajectorySequenceBuilder(back.end())
                 //TODO: CREATE RIGHT PARKING TRAJECTORY
-                .splineTo(new Vector2d(-14, -12),Math.toRadians(0)).build();
+                .splineTo(new Vector2d(-14, -12),Math.toRadians(0))
+                .build();
 
 
 
@@ -204,11 +210,25 @@ public class AutoSpline extends LinearOpMode {
         axelFlip();
 
         drive.followTrajectorySequence(reverse);
-        lift(500); // was 538
+        lift(430); // was 538
         sleep(1500);
         grab();
+        sleep(800);
+        lift(850);
+        sleep(1000);
+        drive.followTrajectorySequence(back);
+        sleep(800);
+        lift(MAX_LIFT_LEVEL);
+        sleep(1000);
+        wristFlip();
         sleep(500);
-        lift(550);
+        axelFlip();
+        sleep(2000);
+        ungrab();
+        sleep(1000);
+        lift(0);
+        axelFlip();
+        sleep(1000);
         //lift(900);
         // RED -- RIGHT ZONE
         if (webcamResponce == 0) {
@@ -220,7 +240,7 @@ public class AutoSpline extends LinearOpMode {
         }
         // BLUE -- LEFT ZONE
         else if (webcamResponce == 2) {
-            //drive.followTrajectorySequence(parkLeft);
+            drive.followTrajectorySequence(parkLeft);
         }
         // ERROR
         else if (webcamResponce == 3) {
