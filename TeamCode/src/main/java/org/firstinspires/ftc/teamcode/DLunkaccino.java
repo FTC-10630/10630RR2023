@@ -24,7 +24,7 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 @Autonomous
-public class Dunkaccino extends LinearOpMode {
+public class DLunkaccino extends LinearOpMode {
     private SampleMecanumDrive drive;
 
 
@@ -128,25 +128,25 @@ public class Dunkaccino extends LinearOpMode {
 
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         // Example: moveSomewhere(double speed, double inches);
-        Pose2d startPose =new Pose2d(-35.50, -60.20, Math.toRadians(90.00)); //this rotation might be off
+        Pose2d startPose =new Pose2d(35.50, -60.20, Math.toRadians(90.00)); //this rotation might be off
         //-31 inches
         drive.setPoseEstimate(startPose);
         TrajectorySequence untitled0 = drive.trajectorySequenceBuilder(new Pose2d(-35.50, -60.20, Math.toRadians(90.00)))
-                .splineTo(new Vector2d(-36, -19.03), Math.toRadians(87.56))
+                .splineTo(new Vector2d(36, -19.03), Math.toRadians(93.44))
                 //.splineTo(new Vector2d(-24.37, -4.34), Math.toRadians(90))
                 //.build();
-                .splineTo(new Vector2d(-30, -1), Math.toRadians(45))
+                .splineTo(new Vector2d(30, -1), Math.toRadians(135))
                 .build();
         TrajectorySequence reverse = drive.trajectorySequenceBuilder(untitled0.end())
-                .splineToConstantHeading(new Vector2d(-32.37, -12), Math.toRadians(45))
+                .splineToConstantHeading(new Vector2d(32.37, -12), Math.toRadians(135))
                 //.splineTo(new Vector2d(-24.37, -19.03), Math.toRadians(87.0))
-                .turn(Math.toRadians(-45))
-                .splineToConstantHeading(new Vector2d(-64.7, -9.3), Math.toRadians(0))
+                .turn(Math.toRadians(45))
+                .splineToConstantHeading(new Vector2d(64.7, -9.3), Math.toRadians(180))
                 .build();
         TrajectorySequence back = drive.trajectorySequenceBuilder(reverse.end())
-                .splineToConstantHeading(new Vector2d(-32.37, -12), Math.toRadians(0))
-                .turn(Math.toRadians(45))
-                .splineToConstantHeading(new Vector2d(-30, -1), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(32.37, -12), Math.toRadians(180))
+                .turn(Math.toRadians(-45))
+                .splineToConstantHeading(new Vector2d(30, -1), Math.toRadians(135))
                 .build();
         TrajectorySequence untitled1 = (drive.trajectorySequenceBuilder(new Pose2d(-35.06, -65, Math.toRadians(90)))
                 .splineTo(new Vector2d(-33, -15), Math.toRadians(75.87))
@@ -155,19 +155,19 @@ public class Dunkaccino extends LinearOpMode {
 
         TrajectorySequence parkLeft = drive.trajectorySequenceBuilder(reverse.end())
                 //TODO: CREATE LEFT PARKING TRAJECTORY
-               // .splineToConstantHeading(new Vector2d(-32.37, -12), Math.toRadians(0))
-                .splineTo(new Vector2d(-59.5,-8.3),Math.toRadians(0))
+                // .splineToConstantHeading(new Vector2d(-32.37, -12), Math.toRadians(0))
+                .splineTo(new Vector2d(14, -12),Math.toRadians(180))
                 .build();
 
         TrajectorySequence parkMiddle = drive.trajectorySequenceBuilder(reverse.end())
                 //TODO: CREATE MIDDLE PARKING TRAJECTORY
-                .splineTo(new Vector2d(-35.37, -12),Math.toRadians(0))
+                .splineTo(new Vector2d(35.37, -12),Math.toRadians(180))
                 .build();
 
 
         TrajectorySequence parkRight = drive.trajectorySequenceBuilder(reverse.end())
                 //TODO: CREATE RIGHT PARKING TRAJECTORY
-                .splineTo(new Vector2d(-14, -12),Math.toRadians(0))
+                .splineTo(new Vector2d(59.5,-8.3),Math.toRadians(180))
                 .build();
 
 
@@ -210,7 +210,7 @@ public class Dunkaccino extends LinearOpMode {
         axelFlip();
         lift(430);
         drive.followTrajectorySequence(reverse);
-         // was 538
+        // was 538
         sleep(100);
         grab();
         sleep(800);

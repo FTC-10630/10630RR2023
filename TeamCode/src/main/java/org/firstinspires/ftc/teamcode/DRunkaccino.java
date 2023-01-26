@@ -24,7 +24,7 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 @Autonomous
-public class Dunkaccino extends LinearOpMode {
+public class DRunkaccino extends LinearOpMode {
     private SampleMecanumDrive drive;
 
 
@@ -155,7 +155,7 @@ public class Dunkaccino extends LinearOpMode {
 
         TrajectorySequence parkLeft = drive.trajectorySequenceBuilder(reverse.end())
                 //TODO: CREATE LEFT PARKING TRAJECTORY
-               // .splineToConstantHeading(new Vector2d(-32.37, -12), Math.toRadians(0))
+                // .splineToConstantHeading(new Vector2d(-32.37, -12), Math.toRadians(0))
                 .splineTo(new Vector2d(-59.5,-8.3),Math.toRadians(0))
                 .build();
 
@@ -210,7 +210,7 @@ public class Dunkaccino extends LinearOpMode {
         axelFlip();
         lift(430);
         drive.followTrajectorySequence(reverse);
-         // was 538
+        // was 538
         sleep(100);
         grab();
         sleep(800);

@@ -5,14 +5,13 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.MotorControlAlgorithm;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
@@ -70,7 +69,6 @@ public class LordFoogThe2st extends LinearOpMode {
     private boolean ypressed;
     private boolean apressed;
     private boolean bpressed;
-    private boolean xpressed;
 
     // Constants
     final double MAX_STICK_COORD = 1.0; // stick goes from -MAX_STICK_COORD to +MAX_STICK_COORD
@@ -80,9 +78,8 @@ public class LordFoogThe2st extends LinearOpMode {
     final double A_LIMIT = 0.15; // acceleration per tick limit
     final double PRECISE_SPEED = 0.2;
 
-    
     final double LIFT_POWER = 0.9; //
-    final double LIFT_SPEED = 12.0;
+    final double LIFT_SPEED = 10.0;
     final double PRECISE_LIFT_SPEED = 5.0; //TODO: try to turn up the speed until its good or the PID can't keep up.
     int MAX_LIFT_LEVEL = 2735; // MAX value is ~38.5 in. * ~77 = ~2926 // every 1500 ticks is ~2.5 in ~77 tpi.
     int MIN_LIFT_LEVEL = 4;
@@ -96,21 +93,24 @@ public class LordFoogThe2st extends LinearOpMode {
     final double GRAB_CLAW_POSITION = 0.55;
     final double UNGRAB_CLAW_POSITION = 0.42;
 
+    final double DISTANCE_FROM_POLE_MIN = 3;//cm
+    final double DISTANCE_FROM_POLE_MAX = 6;
+
+    int counter;
+
     @Override
     public void runOpMode() throws InterruptedException {
-        // initialize everything
         initialize();
-
-        // wait for the start button
         waitForStart();
 
-        // main loop
+        counter=500;
         while (opModeIsActive()) {
-
             driveset();
-
-
             liftset();
+            handset();
+            rumble(counter--);
+
+
             telemetry.addData("Lift Target", (int) (liftLevel * 10) / 10.0);
             telemetry.addData("Lift Level",(int) ((spoolRight.getCurrentPosition()+spoolLeft.getCurrentPosition()) *10)/20);
             telemetry.addData("Diff", ((int)liftLevel-(spoolRight.getCurrentPosition()+spoolLeft.getCurrentPosition())/2)%1000);
@@ -119,18 +119,34 @@ public class LordFoogThe2st extends LinearOpMode {
             telemetry.addData("leftPID",spoolLeft.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER));
             telemetry.addData("leftP",spoolLeft.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION));
 
-            handset();
+            // telemetry.addData("front",distanceFront.getDistance(DistanceUnit.CM));
+            // telemetry.addData("back",distanceBack.getDistance(DistanceUnit.CM));
+
+
+            /* This code must be moved AND OPTIMIZED.
+
+            */
 
             telemetry.update();
         }
     }
+    private void rumble(int counter){
+        if (counter==0){
+            counter=15000;
+            if(distanceBack.getDistance(DistanceUnit.CM) <= 7.9 && distanceBack.getDistance(DistanceUnit.CM) >= 6.0) {
+                gamepad2.rumble(0.5-Math.abs(7.5-distanceBack.getDistance(DistanceUnit.CM)),0.1,500);
+            }
 
+            if(distanceFront.getDistance(DistanceUnit.CM) <= 7.9 && distanceFront.getDistance(DistanceUnit.CM) >= 6.0)  {
+                gamepad2.rumble(0.1,0.5-Math.abs(7.5-distanceBack.getDistance(DistanceUnit.CM)),500);
+            }
+        }
+    }
 
     // Driver with gamepad 2 drives the robot
     // Robot can go in all four directions with the left stick and turn with the right stick
     private void driveset() {
         if (gamepad2.right_bumper) {
-            gamepad2.rumble(0.25,0.25,50);
             speed = HIGH_SPEED;
         }
         if (gamepad2.left_bumper) {
@@ -138,23 +154,20 @@ public class LordFoogThe2st extends LinearOpMode {
         }
         if (gamepad2.dpad_up) { // move forward
             forwardAdjustment = PRECISE_SPEED;
-        }
-        else if (gamepad2.dpad_down) { // move backward
-            forwardAdjustment=-PRECISE_SPEED;
-        }
-        else {
-            forwardAdjustment=0;
+        } else if (gamepad2.dpad_down) { // move backward
+            forwardAdjustment =- PRECISE_SPEED;
+        } else {
+            forwardAdjustment = 0;
         }
         if (gamepad2.dpad_left) { // strafe left
-            strafeAdjustment=PRECISE_SPEED;
+            strafeAdjustment = PRECISE_SPEED;
+        } else if (gamepad2.dpad_right) { // strafe right
+            strafeAdjustment =- PRECISE_SPEED;
+        } else {
+            strafeAdjustment = 0;
         }
-        else if (gamepad2.dpad_right) { // strafe right
-            strafeAdjustment=-PRECISE_SPEED;
-        }
-        else {
-            strafeAdjustment=0;
-        }
-        double ls_y = -gamepad2.left_stick_y, ls_x = -gamepad2.left_stick_x; // -1 - 1
+        double ls_y = -gamepad2.left_stick_y;
+        double ls_x = -gamepad2.left_stick_x; // -1 - 1
         double rs_x = -gamepad2.right_stick_x; // -1 - 1
 
         //                   move  strafe    turn             precise move      precise strafe
@@ -233,7 +246,6 @@ public class LordFoogThe2st extends LinearOpMode {
         }
     }
      */
-
 
     // Code that controlls the spools
     // (use gamepad1 dpad)
@@ -338,8 +350,7 @@ public class LordFoogThe2st extends LinearOpMode {
         backLeft = hardwareMap.get(DcMotor.class, "bl");
         spoolRight = hardwareMap.get(DcMotorEx.class, "spoolr");
         spoolLeft = hardwareMap.get(DcMotorEx.class, "spooll");
-       
-        
+
         spoolRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(10,1,2,0));
         spoolRight.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION,new PIDFCoefficients(15,0,0,0));
         spoolLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(10,1,2,0));
