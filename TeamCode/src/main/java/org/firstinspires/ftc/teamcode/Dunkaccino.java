@@ -58,7 +58,7 @@ public class Dunkaccino extends LinearOpMode {
     private final double LOW_SPEED = 0.5;
 
     private final double LIFT_POWER = 1.5;
-    private final int MAX_LIFT_LEVEL = 2690; // was 2735
+    private final int MAX_LIFT_LEVEL = 2270; // was 2735
     private final int MIN_LIFT_LEVEL = 30;
     private final int START_LIFT_LEVEL = 0;
 
@@ -135,18 +135,18 @@ public class Dunkaccino extends LinearOpMode {
                 .splineTo(new Vector2d(-36, -19.03), Math.toRadians(87.56))
                 //.splineTo(new Vector2d(-24.37, -4.34), Math.toRadians(90))
                 //.build();
-                .splineTo(new Vector2d(-30, -1), Math.toRadians(45))
+                .splineTo(new Vector2d(-29.8, -2.5), Math.toRadians(45))
                 .build();
         TrajectorySequence reverse = drive.trajectorySequenceBuilder(untitled0.end())
-                .splineToConstantHeading(new Vector2d(-32.37, -12), Math.toRadians(45))
+                .splineToLinearHeading(new Pose2d(-32.37, -12), Math.toRadians(0))
                 //.splineTo(new Vector2d(-24.37, -19.03), Math.toRadians(87.0))
-                .turn(Math.toRadians(-45))
+              //  .turn(Math.toRadians(-45))
                 .splineToConstantHeading(new Vector2d(-64.7, -9.3), Math.toRadians(0))
                 .build();
         TrajectorySequence back = drive.trajectorySequenceBuilder(reverse.end())
-                .splineToConstantHeading(new Vector2d(-32.37, -12), Math.toRadians(0))
-                .turn(Math.toRadians(45))
-                .splineToConstantHeading(new Vector2d(-30, -1), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(-49, -11,Math.toRadians(0)), Math.toRadians(0))
+                //.turn(Math.toRadians(45))
+                .splineToSplineHeading(new Pose2d(-29.8, -2.9,Math.toRadians(45)), Math.toRadians(45))
                 .build();
         TrajectorySequence untitled1 = (drive.trajectorySequenceBuilder(new Pose2d(-35.06, -65, Math.toRadians(90)))
                 .splineTo(new Vector2d(-33, -15), Math.toRadians(75.87))
@@ -156,18 +156,18 @@ public class Dunkaccino extends LinearOpMode {
         TrajectorySequence parkLeft = drive.trajectorySequenceBuilder(reverse.end())
                 //TODO: CREATE LEFT PARKING TRAJECTORY
                // .splineToConstantHeading(new Vector2d(-32.37, -12), Math.toRadians(0))
-                .splineTo(new Vector2d(-59.5,-8.3),Math.toRadians(0))
+                .splineTo(new Vector2d(-59.5,-9.3),Math.toRadians(0))
                 .build();
 
         TrajectorySequence parkMiddle = drive.trajectorySequenceBuilder(reverse.end())
                 //TODO: CREATE MIDDLE PARKING TRAJECTORY
-                .splineTo(new Vector2d(-35.37, -12),Math.toRadians(0))
+                .splineTo(new Vector2d(-35.37, -9.3),Math.toRadians(0))
                 .build();
 
 
         TrajectorySequence parkRight = drive.trajectorySequenceBuilder(reverse.end())
                 //TODO: CREATE RIGHT PARKING TRAJECTORY
-                .splineTo(new Vector2d(-14, -12),Math.toRadians(0))
+                .splineTo(new Vector2d(-14, -9.3),Math.toRadians(0))
                 .build();
 
 
@@ -187,6 +187,7 @@ public class Dunkaccino extends LinearOpMode {
 
         /*=-- MOVE CODE SEGMENT START --=*/
         axelFlip();
+        lift(MAX_LIFT_LEVEL);
         drive.followTrajectorySequence(untitled0);
         //sleep(1000);
         /*
@@ -200,30 +201,42 @@ public class Dunkaccino extends LinearOpMode {
 
          */
 
-
-        lift(MAX_LIFT_LEVEL);
-        sleep(1000);
         axelFlip();
-        sleep(1500);
+        sleep(1000);
         ungrab();
         sleep(300);
         axelFlip();
         lift(430);
         drive.followTrajectorySequence(reverse);
          // was 538
+        sleep(50);
+        grab();
+        sleep(800);
+
+        lift(MAX_LIFT_LEVEL);
+        sleep(40);
+        wristFlip();
+        drive.followTrajectorySequence(back);
+        axelFlip();
+        sleep(1000);
+        ungrab();
+        sleep(50);
+        axelFlip();
+        sleep(100);
+        wristFlip();
+        lift(400);
+        drive.followTrajectorySequence(reverse);
+        // was 538
         sleep(100);
         grab();
         sleep(800);
-        lift(850);
-        sleep(1000);
-        drive.followTrajectorySequence(back);
-        sleep(800);
+
         lift(MAX_LIFT_LEVEL);
-        sleep(1000);
+        sleep(40);
         wristFlip();
-        sleep(500);
+        drive.followTrajectorySequence(back);
         axelFlip();
-        sleep(1500);
+        sleep(1000);
         ungrab();
         sleep(1000);
         lift(0);
