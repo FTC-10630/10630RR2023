@@ -112,7 +112,6 @@ public class DunkaMind extends LinearOpMode {
             public void onOpened() {
                 // works
                 webcam.startStreaming(1280, 720, OpenCvCameraRotation.UPSIDE_DOWN);
-
             }
 
             @Override
@@ -137,10 +136,10 @@ public class DunkaMind extends LinearOpMode {
                 .splineTo(new Vector2d(36, -19.03), Math.toRadians(92.44))
                 //.splineTo(new Vector2d(-24.37, -4.34), Math.toRadians(90))
                 //.build();
-                .splineTo(new Vector2d(27, -3), Math.toRadians(135))
+                .splineTo(new Vector2d(30, -4), Math.toRadians(135))
                 .build();
         TrajectorySequence reverse = drive.trajectorySequenceBuilder(untitled0.end())
-                .splineToLinearHeading(new Pose2d(32.37, -12), Math.toRadians(180))
+                .splineToLinearHeading(new Pose2d(32.57, -12, Math.toRadians(180)), Math.toRadians(180))
                 //.splineTo(new Vector2d(-24.37, -19.03), Math.toRadians(87.0))
               //  .turn(Math.toRadians(-45))
                 .splineToConstantHeading(new Vector2d(64.7, -9.3), Math.toRadians(180))
@@ -148,7 +147,7 @@ public class DunkaMind extends LinearOpMode {
         TrajectorySequence back = drive.trajectorySequenceBuilder(reverse.end())
                 .splineToSplineHeading(new Pose2d(49, -11,Math.toRadians(180)), Math.toRadians(180))
                 //.turn(Math.toRadians(45))
-                .splineToSplineHeading(new Pose2d(27, -3,Math.toRadians(135)), Math.toRadians(135))
+                .splineToSplineHeading(new Pose2d(30, -4,Math.toRadians(135)), Math.toRadians(135))
                 .build();
         //TrajectorySequence untitled1 = (drive.trajectorySequenceBuilder(new Pose2d(-35.06, -65, Math.toRadians(90)))
                // .splineTo(new Vector2d(-33, -15), Math.toRadians(75.87))
@@ -191,17 +190,7 @@ public class DunkaMind extends LinearOpMode {
         axelFlip();
         lift(MAX_LIFT_LEVEL);
         drive.followTrajectorySequence(untitled0);
-        //sleep(1000);
-        /*
-        moveForward(LOW_SPEED, TILE * 2 + 1);
-        strafeRight(LOW_SPEED, 11.7);
 
-        moveForward(LOW_SPEED, 4.6);
-        sleep(100);
-
-        moveBackward(LOW_SPEED, 4.6 + 0.5);
-
-         */
 
         axelFlip();
         sleep(1000);
